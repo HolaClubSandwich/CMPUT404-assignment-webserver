@@ -43,11 +43,11 @@ class MyWebServer(socketserver.BaseRequestHandler):
         if data_string != None:
             if http_command != 'GET':
                 self.request.sendall(bytearray("HTTP/1.1 405 Method Not Allowed\r\n", 'utf-8'))
-            elif path[-1] != '/' and '.' not in path.split('/')[-1]:
+            elif '.' not in path.split('/')[-1] and path[-1] != '/':
                 self.request.sendall(bytearray("HTTP/1.1 301 Moved Permanently\r\nLocation: " + path + '/' + "\r\n", 'utf-8'))
 
             else:
-                self.test_server(path)
+                self.server_support(path)
         else:
             self.request.sendall(bytearray("HTTP/1.1 400 Bad Request \r\n", 'utf-8'))
             
@@ -55,23 +55,24 @@ class MyWebServer(socketserver.BaseRequestHandler):
         print ("Got a request of: %s\n" % self.data)
         self.request.sendall(bytearray("OK\r\n",'utf-8'))
 
-    def test_server(self, path):
-        if os.path.realpath(os.getcwd() + '/www' + path).startswith(os.getcwd() + '/www'):
-            if os.path.exists("./www" + path + "/index.html") and path.endswith('/'):
-                web = open("./www" + path + "/index.html").read()
-                if web != None:
-                    self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n" + "Content-Type: text/html\r\n" + web, 'utf-8'))
+    def server_support(self, path):
+        starting_path = './www'
+        if os.path.realpath(os.getcwd() + starting_path + path).startswith(os.getcwd() + starting_path):
+            if os.path.exists(starting_path + path + "/index.html") and path.endswith('/'):
+                data = open(starting_path + path + "/index.html").read()
+                if data != None:
+                    self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n" + "Content-Type: text/html\r\n" + data, 'utf-8'))
                 else:
                     self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n", 'utf-8'))
-            elif os.path.exists("./www" + path) and path.endswith(".html"):
-                web = open("./www" + path).read()
-                self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n" + "Content-Type: text/html\r\n" + web, 'utf-8'))
-            elif os.path.exists("./www" + path) and path.endswith(".css"):
-                web = open("./www" + path).read()
-                self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n" + "Content-Type: text/css\r\n" + web, 'utf-8'))
+            elif os.path.exists(starting_path + path) and path.endswith(".html"):
+                data = open(starting_path + path).read()
+                self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n" + "Content-Type: text/html\r\n" + data, 'utf-8'))
+            elif os.path.exists(starting_path + path) and path.endswith(".css"):
+                data = open(starting_path + path).read()
+                self.request.sendall(bytearray("HTTP/1.1 200 OK\r\n" + "Content-Type: text/css\r\n" + data, 'utf-8'))
             else:
                 try:
-                    web = open("./www" + path + "/index.html")
+                    data = open(starting_path + path + "/index.html")
                     self.request.sendall(bytearray("HTTP/1.1 301 Moved Permanently\r\nLocation: " + path + '/' + "\r\n", 'utf-8'))
                 except:
                     self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n", 'utf-8'))

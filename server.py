@@ -49,7 +49,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             else:
                 self.server_support(path)
         else:
-            self.request.sendall(bytearray("HTTP/1.1 404 Not Found\r\n", 'utf-8'))
+            self.request.sendall(bytearray("HTTP/1.1 400 Bad Request\r\n", 'utf-8'))
             
 
         print ("Got a request of: %s\n" % self.data)
